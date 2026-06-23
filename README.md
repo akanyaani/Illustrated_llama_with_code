@@ -4,7 +4,7 @@
 > Language Model works** &mdash; not by hand-waving, but by building one from scratch, piece by
 > piece, in plain **PyTorch**, with pictures, intuition, and runnable code at every step.
 
-If you have ever wondered *"what is really happening inside ChatGPT-style models?"*, this is
+If you have ever wondered *"what is really happening inside an AI that writes text?"*, this is
 for you. We build a complete **Llama-based decoder** (the architecture behind most modern open
 LLMs) small enough to run on a laptop and print every tensor, yet structurally identical to the
 billion-parameter models in production. Only the numbers get bigger.
@@ -85,21 +85,19 @@ Each token's **query** is matched against every **key** (a dot product) to get s
 
 ---
 
-## What makes it a *Llama-based* decoder (vs classic GPT-2)
+## The key ingredients we build
 
-The backbone is the same decoder-only Transformer GPT-2 made famous. A Llama-based decoder
-keeps that backbone and swaps in four upgrades for **stability, speed, and quality**:
+These are the core building blocks of the architecture. Each one is explained from scratch
+&mdash; intuition, math, code, and a picture &mdash; in the notebook.
 
-| Component | GPT-2 (classic) | **Llama-based decoder (this repo)** | Why the change |
-|---|---|---|---|
-| Normalization | LayerNorm (post-norm) | **RMSNorm (pre-norm)** | cheaper + stable training of deep stacks |
-| Position info | learned absolute embeddings | **Rotary Position Embeddings (RoPE)** | relative positions + better length generalization |
-| Attention | Multi-Head Attention | **Grouped-Query Attention (GQA)** | much smaller memory cache -> faster inference |
-| Feed-forward | GELU MLP (2 matrices) | **SwiGLU (3 matrices, gated)** | learns more per parameter |
-| Linear bias | yes | **none** | fewer params, no quality loss |
-
-Each one is explained from scratch &mdash; intuition, math, code, and a picture &mdash; in the
-notebook.
+| Ingredient | What it does |
+|---|---|
+| **Token embeddings** | turn each token id into a learnable vector |
+| **RMSNorm** | keep activations at a stable scale so the network trains smoothly |
+| **RoPE (Rotary Position Embeddings)** | tell the model *where* each token is, by rotating vectors |
+| **Grouped-Query Attention (GQA)** | let tokens share information efficiently with a small memory footprint |
+| **SwiGLU feed-forward** | a gated network that processes and stores knowledge per token |
+| **Residual connections** | shortcuts that make very deep stacks trainable |
 
 ---
 
@@ -113,13 +111,13 @@ Read it top to bottom. Every section follows the same rhythm: **picture &rarr; i
 | 0 | Tiny configuration | the knobs of a model (`dim`, heads, layers, ...) |
 | 1 | The big picture | how blocks stack into a model |
 | 2 | Token embeddings | turning ids into vectors |
-| 3 | **RMSNorm** | the modern normalization (+ visual vs LayerNorm) |
-| 4 | **RoPE** | encoding *position* by rotation (+ 3 visuals) |
+| 3 | **RMSNorm** | how activations are kept stable (with a visual) |
+| 4 | **RoPE** | encoding *position* by rotation (with 3 visuals) |
 | 5 | Self-attention + masking | how tokens talk to each other |
-| 6 | **Grouped-Query Attention** | the efficiency trick (+ MHA/GQA/MQA diagram) |
-| 7 | **SwiGLU** | the gated feed-forward (+ activation plot) |
+| 6 | **Grouped-Query Attention** | the efficiency trick (with a diagram) |
+| 7 | **SwiGLU** | the gated feed-forward (with an activation plot) |
 | 8 | The decoder block | assembling one full block |
-| 9 | The full model | stacking it all (+ real attention maps) |
+| 9 | The full model | stacking it all (with real attention maps) |
 | 10 | Generation | producing text, and a tiny training run that *proves it learns* |
 
 ---
@@ -147,8 +145,3 @@ Illustrations and GIFs live in `./image`.
 
 **Prerequisites:** basic Python and a rough idea of what a neural network is. No prior
 Transformer knowledge required &mdash; we build everything up from zero.
-
----
-
-*Inspired by the spirit of "The Illustrated Transformer" / "The Illustrated GPT-2". This repo
-extends that picture-first teaching style to the modern Llama-based decoder architecture.*
